@@ -110,6 +110,13 @@ table.lines input[type=number]{width:72px}
   .wrap{padding-inline:0}
 }
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.lock{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:50;padding:16px}
+.lockbox{width:min(380px,100%);display:flex;flex-direction:column;gap:14px;border:1px solid var(--line);border-radius:14px;padding:26px 22px}
+.lockbox h2{font-family:var(--display);font-size:22px;margin:0}
+.lockbox .hint{font-size:12px;color:var(--muted);margin:0}
+.side-acts{display:flex;flex-direction:column;gap:6px}
+.side-acts .btn{padding:7px 12px;font-size:13px}
+@media (max-width:820px){.side-acts{flex-direction:row}}
 </style>
 </head>
 <body>
@@ -127,6 +134,7 @@ table.lines input[type=number]{width:72px}
       <button data-v="medicines">Medicines <span class="count" id="c-medicines"></span></button>
       <button data-v="invoices">Sales &amp; Invoices <span class="count" id="c-invoices"></span></button>
     </nav>
+    <div class="side-acts"><button type="button" class="btn ghost" id="btn-lock">Lock</button><button type="button" class="btn ghost" id="btn-chpass">Change password</button></div>
     <p class="note">Records are saved in this browser on this device.</p>
   </aside>
   <main><div class="wrap" id="view"></div></main>
@@ -169,6 +177,23 @@ table.lines input[type=number]{width:72px}
 </div></dialog>
 
 <div class="toast" id="toast" role="status"></div>
+
+<div class="lock" id="lock" hidden>
+  <form class="lockbox" id="lockfrm" novalidate>
+    <div class="brand">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="9" fill="#0f7a5c"/><path d="M15 8h6v7h7v6h-7v7h-6v-7H8v-6h7z" fill="#fff"/></svg>
+      <div><b>Shifa Pharmacy</b><small>Management System</small></div>
+    </div>
+    <h2 id="lk-title"></h2>
+    <p class="sub" id="lk-sub" style="margin:0"></p>
+    <label id="lk-cur-w" for="lk-cur">Current password<input id="lk-cur" type="password" autocomplete="current-password"></label>
+    <label id="lk-p-w" for="lk-p"><span id="lk-p-l">Password</span><input id="lk-p" type="password"></label>
+    <label id="lk-c-w" for="lk-c">Confirm password<input id="lk-c" type="password" autocomplete="new-password"></label>
+    <p class="err" id="lk-err"></p>
+    <div class="dlg-acts"><button type="button" class="btn ghost" id="lk-cancel">Cancel</button><button class="btn" id="lk-go"></button></div>
+    <p class="hint" id="lk-hint"></p>
+  </form>
+</div>
 
 <script>
 const KEY='shifa-pharmacy-v1';
@@ -512,6 +537,53 @@ document.addEventListener('click',e=>{
 
 const h=location.hash.slice(1);if(['customers','doctors','lab','medicines','invoices'].includes(h))view=h;
 render();
+
+/* ---------- password lock ---------- */
+const PKEY='shifa-pharmacy-pass',UKEY='shifa-pharmacy-unlocked';
+const appEl=document.querySelector('.app'),lockEl=document.getElementById('lock');
+async function hashPw(p){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('shifa-pharmacy:'+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function getPw(){try{return localStorage.getItem(PKEY)}catch(e){return null}}
+function setPw(v){try{localStorage.setItem(PKEY,v)}catch(e){}}
+function isUnlocked(){try{return sessionStorage.getItem(UKEY)==='1'}catch(e){return false}}
+function setUnlocked(on){try{on?sessionStorage.setItem(UKEY,'1'):sessionStorage.removeItem(UKEY)}catch(e){}}
+let lkMode='login';
+function showLock(mode){
+  lkMode=mode;
+  const T={setup:['Set a password','Choose a password to protect this pharmacy system. You will need it every time you open the website.','Set password & open','New password'],
+           login:['Enter password','This system is locked. Enter your password to continue.','Unlock','Password'],
+           change:['Change password','Enter your current password, then choose a new one.','Save new password','New password']}[mode];
+  document.getElementById('lk-title').textContent=T[0];
+  document.getElementById('lk-sub').textContent=T[1];
+  document.getElementById('lk-go').textContent=T[2];
+  document.getElementById('lk-p-l').textContent=T[3];
+  document.getElementById('lk-cur-w').hidden=mode!=='change';
+  document.getElementById('lk-c-w').hidden=mode==='login';
+  document.getElementById('lk-cancel').hidden=mode!=='change';
+  document.getElementById('lk-p').autocomplete=mode==='login'?'current-password':'new-password';
+  document.getElementById('lk-hint').textContent=mode==='login'?'Forgot the password? It can only be reset by clearing this browser’s site data, which also erases the records saved here.':'Use at least 4 characters. Write it down somewhere safe.';
+  ['lk-cur','lk-p','lk-c'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lk-err').textContent='';
+  lockEl.hidden=false;appEl.inert=true;
+  setTimeout(()=>document.getElementById(mode==='change'?'lk-cur':'lk-p').focus(),30);
+}
+function hideLock(){lockEl.hidden=true;appEl.inert=false}
+document.getElementById('lockfrm').onsubmit=async e=>{
+  e.preventDefault();const err=document.getElementById('lk-err');
+  const p=document.getElementById('lk-p').value,c=document.getElementById('lk-c').value;
+  if(lkMode==='login'){
+    if(await hashPw(p)===getPw()){setUnlocked(true);hideLock();toast('Welcome back')}
+    else{err.textContent='Wrong password. Try again.';document.getElementById('lk-p').select()}
+    return;
+  }
+  if(lkMode==='change'&&await hashPw(document.getElementById('lk-cur').value)!==getPw()){err.textContent='Current password is wrong.';return}
+  if(p.length<4){err.textContent='Password must be at least 4 characters.';return}
+  if(p!==c){err.textContent='The two passwords do not match.';return}
+  setPw(await hashPw(p));setUnlocked(true);hideLock();toast(lkMode==='setup'?'Password set':'Password changed');
+};
+document.getElementById('lk-cancel').onclick=hideLock;
+document.getElementById('btn-lock').onclick=()=>{setUnlocked(false);showLock('login')};
+document.getElementById('btn-chpass').onclick=()=>showLock('change');
+if(!getPw())showLock('setup');else if(!isUnlocked())showLock('login');
 </script>
 </body>
 </html>
