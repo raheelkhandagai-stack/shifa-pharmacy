@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shifa Pharmacy Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#ffffff; --surface:#ffffff; --soft:#f4f8f6; --ink:#15302b; --muted:#5d716c; --line:#dde6e2;
+  --accent:#0f7a5c; --accent-soft:#e1f2ec;
+  --ok:#1d7a3e; --ok-bg:#e3f4e8; --warn:#9a5b00; --warn-bg:#fdf0d8; --info:#1f5e9c; --info-bg:#e2edf9; --bad:#b3261e; --bad-bg:#fbe5e3;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--bg);color:var(--ink);border-right:1px solid var(--line);padding:24px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:24px}
+.brand{display:flex;gap:10px;align-items:center}
+.brand svg{flex:none}
+.brand b{font-family:var(--display);font-size:20px;color:var(--ink);line-height:1.1;display:block}
+.brand small{font-size:12px;color:var(--muted)}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{all:unset;cursor:pointer;padding:10px 12px;border-radius:8px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+nav button:hover{background:var(--soft)}
+nav button[aria-current="true"]{background:var(--accent);color:#fff}
+nav button:focus-visible{outline:2px solid var(--accent)}
+nav .count{font-size:12px;font-variant-numeric:tabular-nums;opacity:.85}
+.note{margin-top:auto;font-size:12px;opacity:.7}
+main{padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-width:0}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px;padding-inline:8px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--display);font-size:30px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0}
+.btn{font:inherit;font-weight:600;border:1px solid transparent;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat span{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat b{display:block;font-family:var(--display);font-size:28px;font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel-head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-head h2{font-family:var(--display);font-size:18px;margin:0}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.filters input{width:220px;max-width:100%}
+.filters select{width:auto}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:10px 16px;background:var(--soft);white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:hover td{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+.nm{font-weight:600}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.p-ok{background:var(--ok-bg);color:var(--ok)} .p-warn{background:var(--warn-bg);color:var(--warn)} .p-info{background:var(--info-bg);color:var(--info)} .p-bad{background:var(--bad-bg);color:var(--bad)}
+.acts{display:flex;gap:6px;white-space:nowrap}
+.acts button{font:inherit;font-size:13px;background:none;border:1px solid var(--line);border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--ink)}
+.acts button.del{color:var(--bad)}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.list small{color:var(--muted);display:block}
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(5,20,16,.45)}
+dialog form{display:flex;flex-direction:column;gap:14px;padding:20px}
+dialog h3{font-family:var(--display);margin:0;font-size:20px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fields .full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.dlg-acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.err{color:var(--bad);font-size:13px;min-height:1em;margin:0}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.sample{font-size:12px;color:var(--warn);background:var(--warn-bg);padding:2px 8px;border-radius:6px}
+dialog.wide{width:min(760px,calc(100vw - 32px))}
+table.lines th,table.lines td{padding:6px 6px}
+table.lines td:first-child{min-width:200px}
+table.lines input,table.lines select{padding:6px 8px}
+table.lines input[type=number]{width:72px}
+.xbtn{font:inherit;background:none;border:0;color:var(--bad);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px}
+.totals{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;font-variant-numeric:tabular-nums;font-size:14px}
+.totals div{display:flex;justify-content:space-between;gap:12px}
+.totals .grand{font-family:var(--display);font-size:20px;color:var(--ink)}
+.rcpt-wrap{padding:20px;display:flex;flex-direction:column;gap:16px}
+.receipt{background:#fff;color:#1c1c1c;border:1px dashed #b9b2a2;border-radius:6px;padding:22px 20px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.55;max-width:380px;width:100%;margin:0 auto}
+.receipt .c{text-align:center}
+.receipt h4{font-family:var(--display);font-size:20px;margin:0}
+.receipt hr{border:0;border-top:1px dashed #9c9585;margin:10px 0}
+.receipt .r{display:flex;justify-content:space-between;gap:10px}
+.receipt .it{margin:4px 0}
+.receipt .it small{color:#5b5547}
+.receipt .big{font-weight:700;font-size:15px}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line);padding:14px 16px;padding-right:max(16px,env(safe-area-inset-right,0px));gap:12px}
+  nav{flex-direction:row;overflow-x:auto}
+  nav button{white-space:nowrap;gap:8px}
+  .note{display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2,.fields{grid-template-columns:1fr}
+  .wrap{padding-inline:0}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="9" fill="#0f7a5c"/><path d="M15 8h6v7h7v6h-7v7h-6v-7H8v-6h7z" fill="#fff"/></svg>
+      <div><b>Shifa Pharmacy</b><small>Management System</small></div>
+    </div>
+    <nav id="nav">
+      <button data-v="dashboard">Dashboard</button>
+      <button data-v="customers">Customers <span class="count" id="c-customers"></span></button>
+      <button data-v="doctors">Doctors <span class="count" id="c-doctors"></span></button>
+      <button data-v="lab">Lab Tests <span class="count" id="c-lab"></span></button>
+      <button data-v="medicines">Medicines <span class="count" id="c-medicines"></span></button>
+      <button data-v="invoices">Sales &amp; Invoices <span class="count" id="c-invoices"></span></button>
+    </nav>
+    <p class="note">Records are saved in this browser on this device.</p>
+  </aside>
+  <main><div class="wrap" id="view"></div></main>
+</div>
+
+<dialog id="dlg"><form id="frm" novalidate>
+  <h3 id="dlg-title"></h3>
+  <div class="fields" id="dlg-fields"></div>
+  <p class="err" id="dlg-err"></p>
+  <div class="dlg-acts"><button type="button" class="btn ghost" id="dlg-cancel">Cancel</button><button class="btn" id="dlg-save">Save</button></div>
+</form></dialog>
+
+<dialog id="del"><form id="delfrm">
+  <h3>Delete record?</h3>
+  <p id="del-msg" style="margin:0"></p>
+  <div class="dlg-acts"><button type="button" class="btn ghost" id="del-cancel">Keep it</button><button class="btn danger">Delete</button></div>
+</form></dialog>
+
+<dialog id="inv" class="wide"><form id="invfrm" novalidate>
+  <h3>New invoice</h3>
+  <div class="fields">
+    <label for="inv-cust">Customer<select id="inv-cust"></select></label>
+    <label for="inv-doc">Prescribed by<select id="inv-doc"></select></label>
+  </div>
+  <div class="tbl"><table class="lines"><thead><tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead><tbody id="inv-lines"></tbody></table></div>
+  <div><button type="button" class="btn ghost" id="inv-add">+ Add medicine</button></div>
+  <div class="fields">
+    <label for="inv-disc">Discount (%)<input id="inv-disc" type="number" min="0" max="100" value="0"></label>
+    <label for="inv-pay">Payment method<select id="inv-pay"><option>Cash</option><option>Card</option><option>JazzCash</option><option>EasyPaisa</option><option>Credit (pay later)</option></select></label>
+    <label for="inv-paid">Amount received (Rs)<input id="inv-paid" type="number" min="0"></label>
+    <div class="totals" id="inv-totals"></div>
+  </div>
+  <p class="err" id="inv-err"></p>
+  <div class="dlg-acts"><button type="button" class="btn ghost" id="inv-cancel">Cancel</button><button class="btn">Save &amp; show receipt</button></div>
+</form></dialog>
+
+<dialog id="rcpt"><div class="rcpt-wrap">
+  <div class="receipt" id="rcpt-body"></div>
+  <div class="dlg-acts"><button type="button" class="btn ghost" id="rcpt-close">Done</button><button type="button" class="btn ghost" id="rcpt-copy">Copy text</button><button type="button" class="btn" id="rcpt-print">Print receipt</button></div>
+</div></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const KEY='shifa-pharmacy-v1';
+const today=new Date().toISOString().slice(0,10);
+const d=(n)=>{const x=new Date();x.setDate(x.getDate()-n);return x.toISOString().slice(0,10)};
+
+const SAMPLE={
+  sample:true,
+  customers:[
+    {id:'C-1001',name:'Ahmed Raza',phone:'0300-5123456',age:46,gender:'Male',address:'G-9/2, Islamabad',condition:'Diabetes (Type 2)',balance:1250,lastVisit:d(1)},
+    {id:'C-1002',name:'Ayesha Khan',phone:'0321-7788990',age:32,gender:'Female',address:'F-7/3, Islamabad',condition:'Asthma',balance:0,lastVisit:d(3)},
+    {id:'C-1003',name:'Muhammad Bilal',phone:'0333-4455667',age:58,gender:'Male',address:'Saddar, Rawalpindi',condition:'Hypertension',balance:3400,lastVisit:d(0)},
+    {id:'C-1004',name:'Fatima Noor',phone:'0345-1122334',age:27,gender:'Female',address:'I-8/4, Islamabad',condition:'—',balance:0,lastVisit:d(9)},
+    {id:'C-1005',name:'Usman Tariq',phone:'0312-9988776',age:64,gender:'Male',address:'Bahria Town Ph 4',condition:'Cardiac',balance:780,lastVisit:d(2)}
+  ],
+  doctors:[
+    {id:'D-201',name:'Dr. Sana Malik',specialty:'General Physician',phone:'0300-1112233',timing:'10:00 AM – 2:00 PM',fee:1500,status:'Available'},
+    {id:'D-202',name:'Dr. Imran Qureshi',specialty:'Cardiologist',phone:'0321-4445566',timing:'5:00 PM – 9:00 PM',fee:3000,status:'Available'},
+    {id:'D-203',name:'Dr. Hina Shah',specialty:'Gynecologist',phone:'0333-7778899',timing:'11:00 AM – 3:00 PM',fee:2500,status:'On leave'},
+    {id:'D-204',name:'Dr. Kamran Ali',specialty:'Pediatrician',phone:'0345-2223344',timing:'4:00 PM – 8:00 PM',fee:2000,status:'Available'}
+  ],
+  lab:[
+    {id:'L-5001',patient:'Ahmed Raza',test:'HbA1c',doctor:'Dr. Sana Malik',date:d(1),price:1800,status:'Completed',result:'7.2 %'},
+    {id:'L-5002',patient:'Muhammad Bilal',test:'Lipid Profile',doctor:'Dr. Imran Qureshi',date:d(0),price:2200,status:'Sample collected',result:''},
+    {id:'L-5003',patient:'Ayesha Khan',test:'CBC',doctor:'Dr. Sana Malik',date:d(0),price:900,status:'Pending',result:''},
+    {id:'L-5004',patient:'Usman Tariq',test:'ECG',doctor:'Dr. Imran Qureshi',date:d(2),price:1200,status:'Completed',result:'Normal sinus rhythm'},
+    {id:'L-5005',patient:'Fatima Noor',test:'Thyroid (TSH)',doctor:'Dr. Hina Shah',date:d(4),price:1500,status:'Completed',result:'2.1 mIU/L'}
+  ],
+  medicines:[
+    {id:'M-301',name:'Panadol 500mg',generic:'Paracetamol',category:'Tablet',company:'GSK',batch:'PN2408',expiry:'2027-08-31',stock:420,unit:'Tablet',price:3,reorder:100},
+    {id:'M-302',name:'Augmentin 625mg',generic:'Amoxicillin + Clavulanate',category:'Tablet',company:'GSK',batch:'AG1193',expiry:'2027-03-31',stock:36,unit:'Tablet',price:62,reorder:50},
+    {id:'M-303',name:'Glucophage 500mg',generic:'Metformin',category:'Tablet',company:'Merck',batch:'GL5521',expiry:'2027-11-30',stock:300,unit:'Tablet',price:5,reorder:100},
+    {id:'M-304',name:'Ventolin Inhaler',generic:'Salbutamol',category:'Inhaler',company:'GSK',batch:'VT0871',expiry:'2026-12-31',stock:14,unit:'Inhaler',price:540,reorder:10},
+    {id:'M-305',name:'Brufen Syrup 100ml',generic:'Ibuprofen',category:'Syrup',company:'Abbott',batch:'BR3310',expiry:'2027-05-31',stock:8,unit:'Bottle',price:185,reorder:15},
+    {id:'M-306',name:'Concor 5mg',generic:'Bisoprolol',category:'Tablet',company:'Merck',batch:'CN7742',expiry:'2028-01-31',stock:180,unit:'Tablet',price:14,reorder:60},
+    {id:'M-307',name:'Risek 20mg',generic:'Omeprazole',category:'Capsule',company:'Getz Pharma',batch:'RS4402',expiry:'2027-09-30',stock:240,unit:'Capsule',price:21,reorder:80}
+  ],
+  invoices:[
+    {id:'INV-0001',date:d(1),time:'11:42',customer:'Ahmed Raza',phone:'0300-5123456',doctor:'Dr. Sana Malik',items:[{med:'Glucophage 500mg',qty:30,price:5},{med:'Panadol 500mg',qty:10,price:3}],disc:0,pay:'Cash',paid:180},
+    {id:'INV-0002',date:d(0),time:'10:15',customer:'Muhammad Bilal',phone:'0333-4455667',doctor:'Dr. Imran Qureshi',items:[{med:'Concor 5mg',qty:30,price:14},{med:'Risek 20mg',qty:14,price:21}],disc:5,pay:'JazzCash',paid:700}
+  ]
+};
+
+let db;
+try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!db||!db.customers) db=structuredClone(SAMPLE);
+if(!db.medicines) db.medicines=db.sample?structuredClone(SAMPLE.medicines):[];
+if(!db.invoices) db.invoices=db.sample?structuredClone(SAMPLE.invoices):[];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+
+const rs=n=>'Rs '+Number(n||0).toLocaleString('en-PK');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtDate=s=>s?new Date(s+'T00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const pill=(t)=>{const m={'Available':'ok','Completed':'ok','Paid':'ok','On leave':'warn','Pending':'warn','Sample collected':'info','Cancelled':'bad'};return `<span class="pill p-${m[t]||'info'}">${esc(t)}</span>`};
+
+const LAB_TESTS=['CBC','Blood Sugar (Fasting)','Blood Sugar (Random)','HbA1c','Lipid Profile','Liver Function (LFT)','Kidney Function (RFT)','Thyroid (TSH)','Urine R/E','Vitamin D','ECG','X-Ray Chest','Ultrasound'];
+
+const SCHEMA={
+  customers:{title:'Customers',one:'customer',prefix:'C-',
+    fields:[
+      {k:'name',l:'Full name',req:1},{k:'phone',l:'Phone',req:1,ph:'03XX-XXXXXXX'},
+      {k:'age',l:'Age',type:'number'},{k:'gender',l:'Gender',opts:['Male','Female','Other']},
+      {k:'address',l:'Address',full:1},{k:'condition',l:'Medical condition / allergies',full:1},
+      {k:'balance',l:'Balance due (Rs)',type:'number'},{k:'lastVisit',l:'Last visit',type:'date'}],
+    cols:[['id','ID',r=>`<span class="id">${r.id}</span>`],['name','Name',r=>`<span class="nm">${esc(r.name)}</span><br><span class="id">${esc(r.phone)}</span>`],
+      ['age','Age / Gender',r=>`${esc(r.age||'—')} · ${esc(r.gender||'—')}`],['condition','Condition',r=>esc(r.condition||'—')],
+      ['balance','Balance',r=>r.balance>0?`<span class="pill p-warn">${rs(r.balance)}</span>`:pill('Paid'),1],['lastVisit','Last visit',r=>fmtDate(r.lastVisit),1]],
+    search:['name','phone','address','condition','id']},
+  doctors:{title:'Doctors',one:'doctor',prefix:'D-',
+    fields:[{k:'name',l:'Doctor name',req:1,ph:'Dr. '},{k:'specialty',l:'Specialty',req:1},
+      {k:'phone',l:'Phone'},{k:'fee',l:'Consultation fee (Rs)',type:'number'},
+      {k:'timing',l:'Clinic timing',ph:'10:00 AM – 2:00 PM'},{k:'status',l:'Status',opts:['Available','On leave']}],
+    cols:[['id','ID',r=>`<span class="id">${r.id}</span>`],['name','Doctor',r=>`<span class="nm">${esc(r.name)}</span><br><span class="id">${esc(r.phone)}</span>`],
+      ['specialty','Specialty',r=>esc(r.specialty)],['timing','Timing',r=>esc(r.timing||'—')],['fee','Fee',r=>rs(r.fee),1],['status','Status',r=>pill(r.status)]],
+    search:['name','specialty','phone','id'],filter:{k:'status',opts:['Available','On leave']}},
+  lab:{title:'Lab Tests',one:'lab test',prefix:'L-',
+    fields:[{k:'patient',l:'Patient',req:1,src:'customers'},{k:'test',l:'Test',req:1,opts:LAB_TESTS},
+      {k:'doctor',l:'Referred by',src:'doctors',blank:'Walk-in (no referral)'},{k:'date',l:'Date',type:'date'},
+      {k:'price',l:'Price (Rs)',type:'number'},{k:'status',l:'Status',opts:['Pending','Sample collected','Completed','Cancelled']},
+      {k:'result',l:'Result / remarks',full:1,area:1}],
+    cols:[['id','ID',r=>`<span class="id">${r.id}</span>`],['patient','Patient',r=>`<span class="nm">${esc(r.patient)}</span>`],
+      ['test','Test',r=>esc(r.test)],['doctor','Referred by',r=>esc(r.doctor||'Walk-in')],['date','Date',r=>fmtDate(r.date),1],
+      ['price','Price',r=>rs(r.price),1],['status','Status',r=>pill(r.status)+(r.result?`<br><span class="id">${esc(r.result)}</span>`:'')]],
+    search:['patient','test','doctor','id','result'],filter:{k:'status',opts:['Pending','Sample collected','Completed','Cancelled']}},
+  medicines:{title:'Medicines',one:'medicine',prefix:'M-',
+    fields:[{k:'name',l:'Brand name & strength',req:1,ph:'Panadol 500mg'},{k:'generic',l:'Generic / formula'},
+      {k:'category',l:'Form',opts:['Tablet','Capsule','Syrup','Injection','Inhaler','Drops','Cream / Ointment','Sachet','Other']},{k:'company',l:'Company'},
+      {k:'batch',l:'Batch no.'},{k:'expiry',l:'Expiry date',type:'date'},
+      {k:'stock',l:'Quantity in stock',type:'number',req:1},{k:'unit',l:'Sold per',opts:['Tablet','Capsule','Strip','Pack','Bottle','Tube','Inhaler','Injection','Sachet']},
+      {k:'price',l:'Sale price per unit (Rs)',type:'number',req:1},{k:'reorder',l:'Low-stock alert at',type:'number'}],
+    cols:[['id','ID',r=>`<span class="id">${r.id}</span>`],['name','Medicine',r=>`<span class="nm">${esc(r.name)}</span><br><span class="id">${esc(r.generic||'')}</span>`],
+      ['category','Form / Company',r=>`${esc(r.category||'—')}<br><span class="id">${esc(r.company||'')}</span>`],
+      ['batch','Batch / Expiry',r=>`<span class="id">${esc(r.batch||'—')}</span><br>${expPill(r.expiry)}`],
+      ['stock','Stock',r=>stockPill(r),1],['price','Price',r=>rs(r.price)+`<br><span class="id">per ${esc((r.unit||'unit').toLowerCase())}</span>`,1]],
+    search:['name','generic','company','batch','id','category'],filter:{k:'_flag',opts:['Low stock','Expiring soon','Expired']}}
+};
+function daysTo(s){return s?Math.round((new Date(s+'T00:00')-new Date(today+'T00:00'))/864e5):9999}
+function expPill(s){const n=daysTo(s);if(!s)return '—';if(n<0)return `<span class="pill p-bad">Expired ${fmtDate(s)}</span>`;if(n<=90)return `<span class="pill p-warn">${fmtDate(s)}</span>`;return fmtDate(s)}
+function isLow(m){return Number(m.stock)<=Number(m.reorder||0)}
+function stockPill(m){return Number(m.stock)<=0?`<span class="pill p-bad">Out of stock</span>`:isLow(m)?`<span class="pill p-warn">${m.stock} left</span>`:`${m.stock}`}
+function medFlag(m){const n=daysTo(m.expiry);return n<0?'Expired':n<=90?'Expiring soon':isLow(m)?'Low stock':''}
+function invCalc(v){const sub=v.items.reduce((s,i)=>s+i.qty*i.price,0);const disc=Math.round(sub*(Number(v.disc)||0)/100);const total=sub-disc;const paid=Number(v.paid)||0;return{sub,disc,total,paid,due:Math.max(0,total-paid),change:Math.max(0,paid-total)}}
+
+let view='dashboard',q='',fv='';
+const V=document.getElementById('view');
+
+function counts(){for(const k of ['customers','doctors','lab','medicines','invoices'])document.getElementById('c-'+k).textContent=db[k].length}
+
+function render(){
+  counts();
+  document.querySelectorAll('#nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===view));
+  view==='dashboard'?renderDash():view==='invoices'?renderInvoices():renderTable(view);
+}
+
+function renderInvoices(){
+  let rows=db.invoices.filter(v=>!q||[v.id,v.customer,v.phone,v.doctor,...v.items.map(i=>i.med)].some(x=>String(x||'').toLowerCase().includes(q.toLowerCase())));
+  rows=[...rows].reverse();
+  const todays=db.invoices.filter(v=>v.date===today);
+  const sumT=todays.reduce((s,v)=>s+invCalc(v).total,0);
+  const dueAll=db.invoices.reduce((s,v)=>s+invCalc(v).due,0);
+  V.innerHTML=`
+  <header class="top"><div><h1>Sales &amp; Invoices</h1><p class="sub">${db.invoices.length} invoices ${sampleTag()}</p></div><button class="btn" data-newinv="1">+ New invoice</button></header>
+  <div class="stats">
+    <div class="stat"><span>Invoices today</span><b>${todays.length}</b></div>
+    <div class="stat"><span>Sales today</span><b>${rs(sumT)}</b></div>
+    <div class="stat"><span>All-time sales</span><b>${rs(db.invoices.reduce((s,v)=>s+invCalc(v).total,0))}</b></div>
+    <div class="stat"><span>Unpaid on invoices</span><b>${rs(dueAll)}</b></div>
+  </div>
+  <section class="panel">
+    <div class="panel-head"><h2>All invoices</h2><div class="filters"><button class="btn ghost" data-printlist="Sales &amp; Invoices">Print list</button><input id="q" type="search" placeholder="Search invoice, customer, medicine…" value="${esc(q)}" aria-label="Search"></div></div>
+    ${rows.length?`<div class="tbl"><table><thead><tr><th>Invoice</th><th>Customer</th><th>Medicines</th><th>Date</th><th>Total</th><th>Payment</th><th></th></tr></thead><tbody>
+    ${rows.map(v=>{const c=invCalc(v);return `<tr><td><span class="id">${v.id}</span></td><td><span class="nm">${esc(v.customer)}</span><br><span class="id">${esc(v.phone||'')}</span></td>
+      <td>${v.items.map(i=>`${esc(i.med)} × ${i.qty}`).join('<br>')}</td><td class="num">${fmtDate(v.date)}<br><span class="id">${esc(v.time||'')}</span></td>
+      <td class="num">${rs(c.total)}</td><td>${c.due>0?`<span class="pill p-warn">${rs(c.due)} due</span>`:pill('Paid')}<br><span class="id">${esc(v.pay)}</span></td>
+      <td><div class="acts"><button data-rcpt="${v.id}">Receipt</button><button class="del" data-del="${v.id}">Delete</button></div></td></tr>`}).join('')}
+    </tbody></table></div>`:`<p class="empty">${db.invoices.length?'No invoices match your search.':'No sales yet. Click “New invoice” to bill your first customer.'}</p>`}
+  </section>`;
+  const qi=document.getElementById('q');
+  qi.oninput=e=>{q=e.target.value;renderInvoices();const n=document.getElementById('q');n.focus();n.setSelectionRange(q.length,q.length)};
+}
+
+/* ---------- new invoice ---------- */
+const inv=document.getElementById('inv'),invLines=document.getElementById('inv-lines');
+function medOpts(sel){return `<option value="">Select medicine…</option>`+db.medicines.map(m=>`<option value="${m.id}" ${m.id===sel?'selected':''} ${Number(m.stock)<=0?'disabled':''}>${esc(m.name)} — ${m.stock} in stock${daysTo(m.expiry)<0?' (EXPIRED)':''}</option>`).join('')}
+let lineN=0;
+function addLine(){const n=lineN++;const tr=document.createElement('tr');tr.innerHTML=`<td><select id="ln-m-${n}" aria-label="Medicine">${medOpts()}</select></td><td><input id="ln-q-${n}" type="number" min="1" value="1" aria-label="Quantity"></td><td class="num ln-p">—</td><td class="num ln-t">—</td><td><button type="button" class="xbtn" aria-label="Remove line">×</button></td>`;invLines.appendChild(tr);updTotals()}
+function readLines(){return [...invLines.rows].map(tr=>{const m=db.medicines.find(x=>x.id===tr.querySelector('select').value);const qty=Math.max(0,parseInt(tr.querySelector('input').value)||0);return{tr,m,qty}})}
+function updTotals(){
+  const ls=readLines();
+  ls.forEach(l=>{l.tr.querySelector('.ln-p').textContent=l.m?rs(l.m.price):'—';l.tr.querySelector('.ln-t').textContent=l.m?rs(l.m.price*l.qty):'—'});
+  const c=invCalc({items:ls.filter(l=>l.m).map(l=>({qty:l.qty,price:Number(l.m.price)})),disc:document.getElementById('inv-disc').value,paid:document.getElementById('inv-paid').value});
+  document.getElementById('inv-totals').innerHTML=`<div><span>Subtotal</span><span>${rs(c.sub)}</span></div><div><span>Discount</span><span>− ${rs(c.disc)}</span></div><div class="grand"><span>Total</span><span>${rs(c.total)}</span></div>`;
+  return c;
+}
+function openInvoice(){
+  if(!db.medicines.length){toast('Add medicines first');view='medicines';render();return}
+  document.getElementById('inv-cust').innerHTML=`<option value="">Walk-in customer</option>`+db.customers.map(c=>`<option>${esc(c.name)}</option>`).join('');
+  document.getElementById('inv-doc').innerHTML=`<option value="">No prescription</option>`+db.doctors.map(c=>`<option>${esc(c.name)}</option>`).join('');
+  document.getElementById('inv-disc').value=0;document.getElementById('inv-paid').value='';document.getElementById('inv-pay').value='Cash';
+  document.getElementById('inv-err').textContent='';invLines.innerHTML='';addLine();inv.showModal();
+}
+invLines.addEventListener('input',updTotals);invLines.addEventListener('change',updTotals);
+invLines.addEventListener('click',e=>{if(e.target.closest('.xbtn')){e.target.closest('tr').remove();if(!invLines.rows.length)addLine();updTotals()}});
+['inv-disc','inv-paid'].forEach(id=>document.getElementById(id).addEventListener('input',updTotals));
+document.getElementById('inv-add').onclick=addLine;
+document.getElementById('inv-cancel').onclick=()=>inv.close();
+document.getElementById('invfrm').onsubmit=e=>{
+  e.preventDefault();const err=document.getElementById('inv-err');
+  const ls=readLines().filter(l=>l.m);
+  if(!ls.length){err.textContent='Select at least one medicine.';return}
+  if(ls.some(l=>l.qty<1)){err.textContent='Quantity must be 1 or more.';return}
+  const need={};ls.forEach(l=>need[l.m.id]=(need[l.m.id]||0)+l.qty);
+  const short=Object.entries(need).find(([id,q])=>q>Number(db.medicines.find(m=>m.id===id).stock));
+  if(short){const m=db.medicines.find(x=>x.id===short[0]);err.textContent=`Only ${m.stock} of ${m.name} in stock. Lower the quantity.`;return}
+  const custName=document.getElementById('inv-cust').value,cust=db.customers.find(c=>c.name===custName);
+  const pay=document.getElementById('inv-pay').value;
+  const c=updTotals();
+  let paid=document.getElementById('inv-paid').value;
+  paid=paid===''?(pay.startsWith('Credit')?0:c.total):Number(paid);
+  if(!cust&&paid<c.total){err.textContent='Walk-in customers must pay in full. Pick a registered customer to keep a balance.';return}
+  const nums=db.invoices.map(v=>parseInt(v.id.split('-')[1])||0);
+  const now=new Date();
+  const v={id:'INV-'+String(Math.max(0,...nums)+1).padStart(4,'0'),date:today,time:now.toTimeString().slice(0,5),
+    customer:custName||'Walk-in customer',phone:cust?.phone||'',doctor:document.getElementById('inv-doc').value,
+    items:ls.map(l=>({med:l.m.name,qty:l.qty,price:Number(l.m.price)})),disc:Number(document.getElementById('inv-disc').value)||0,pay,paid};
+  ls.forEach(l=>l.m.stock=Number(l.m.stock)-l.qty);
+  const cc=invCalc(v);
+  if(cust){cust.lastVisit=today;if(cc.due>0)cust.balance=Number(cust.balance||0)+cc.due}
+  db.invoices.push(v);save();inv.close();render();showReceipt(v.id);toast('Invoice '+v.id+' saved');
+};
+
+/* ---------- receipt ---------- */
+const rc=document.getElementById('rcpt');let rcText='',rcId=null;
+function showReceipt(id){
+  rcId=id;const v=db.invoices.find(x=>x.id===id),c=invCalc(v);
+  const ln=(a,b)=>`<div class="r"><span>${a}</span><span>${b}</span></div>`;
+  document.getElementById('rcpt-body').innerHTML=`
+    <div class="c"><h4>Shifa Pharmacy</h4><div>Lab &amp; Clinic</div><div>Main Boulevard, Islamabad</div><div>Ph: 051-1234567</div></div><hr>
+    <div class="c big">SALES INVOICE</div>
+    ${ln('Invoice #',v.id)}${ln('Date',fmtDate(v.date)+' '+(v.time||''))}${ln('Customer',esc(v.customer))}${v.phone?ln('Phone',esc(v.phone)):''}${v.doctor?ln('Prescribed by',esc(v.doctor)):''}<hr>
+    ${v.items.map(i=>`<div class="it"><div>${esc(i.med)}</div><div class="r"><small>${i.qty} × ${rs(i.price)}</small><span>${rs(i.qty*i.price)}</span></div></div>`).join('')}<hr>
+    ${ln('Subtotal',rs(c.sub))}${c.disc?ln(`Discount (${v.disc}%)`,'− '+rs(c.disc)):''}
+    <div class="r big"><span>TOTAL</span><span>${rs(c.total)}</span></div>
+    ${ln('Paid ('+esc(v.pay)+')',rs(c.paid))}${c.change?ln('Change returned',rs(c.change)):''}${c.due?`<div class="r big"><span>Balance due</span><span>${rs(c.due)}</span></div>`:''}<hr>
+    <div class="c">Medicines once sold cannot be returned without receipt.<br>Thank you, get well soon!</div>`;
+  rcText=[`SHIFA PHARMACY`,`Invoice ${v.id} · ${fmtDate(v.date)} ${v.time||''}`,`Customer: ${v.customer}`,v.doctor?`Prescribed by: ${v.doctor}`:'','---',
+    ...v.items.map(i=>`${i.med}  ${i.qty} x ${rs(i.price)} = ${rs(i.qty*i.price)}`),'---',`Subtotal: ${rs(c.sub)}`,c.disc?`Discount: -${rs(c.disc)}`:'',`TOTAL: ${rs(c.total)}`,`Paid (${v.pay}): ${rs(c.paid)}`,c.due?`Balance due: ${rs(c.due)}`:'','Thank you!'].filter(Boolean).join('\n');
+  rc.showModal();
+}
+document.getElementById('rcpt-close').onclick=()=>rc.close();
+document.getElementById('rcpt-print').onclick=()=>printDoc(`Receipt ${rcId}`,`<div class="receipt">${document.getElementById('rcpt-body').innerHTML}</div>`,true);
+
+/* ---------- printing: direct browser print via hidden frame ---------- */
+const PRINT_CSS=`body{font-family:"Segoe UI",Arial,sans-serif;color:#111;margin:24px;background:#fff}
+h1{font-size:20px;margin:0}.meta{color:#555;font-size:12px;margin:2px 0 16px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f1f4f3}
+.id{color:#555;font-size:11px}.nm{font-weight:600}.pill{font-weight:600}
+.receipt{font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:1.5;width:300px;margin:0 auto}
+.receipt .c{text-align:center}.receipt h4{font-size:18px;margin:0}.receipt hr{border:0;border-top:1px dashed #777;margin:8px 0}
+.receipt .r{display:flex;justify-content:space-between;gap:8px}.receipt .it{margin:3px 0}.receipt .big{font-weight:700;font-size:14px}
+@media print{body{margin:8mm}}`;
+function printDoc(title,inner,narrow){
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${PRINT_CSS}${narrow?'@page{size:80mm auto;margin:4mm}':''}</style></head><body>${inner}</body></html>`;
+  const f=document.createElement('iframe');
+  f.setAttribute('aria-hidden','true');
+  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  f.onload=()=>{setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast('Press Ctrl+P to print')}setTimeout(()=>f.remove(),2000)},250)};
+  document.body.appendChild(f);
+  f.srcdoc=html;
+}
+function printList(title){
+  const t=document.querySelector('#view table');if(!t){toast('Nothing to print');return}
+  const c=t.cloneNode(true);c.querySelectorAll('tr').forEach(r=>r.lastElementChild?.remove());
+  const plain=title.replace('&amp;','&');
+  printDoc(plain,`<h1>Shifa Pharmacy — ${title}</h1><p class="meta">Printed ${new Date().toLocaleString('en-GB')} · ${c.tBodies[0].rows.length} records</p>${c.outerHTML}`);
+}
+document.getElementById('rcpt-copy').onclick=()=>{navigator.clipboard.writeText(rcText).then(()=>toast('Receipt copied')).catch(()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('rcpt-body'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Text selected — press Ctrl+C')})};
+
+function sampleTag(){return db.sample?`<span class="sample">Example data — edit or delete it</span>`:''}
+
+function renderDash(){
+  const pending=db.lab.filter(x=>x.status==='Pending'||x.status==='Sample collected');
+  const due=db.customers.reduce((s,c)=>s+Number(c.balance||0),0);
+  const labToday=db.lab.filter(x=>x.date===today&&x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price||0),0);
+  const avail=db.doctors.filter(x=>x.status==='Available');
+  V.innerHTML=`
+  <header class="top"><div><h1>Dashboard</h1><p class="sub">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} ${sampleTag()}</p></div>
+  <div class="filters"><button class="btn ghost" data-add="customers">+ Customer</button><button class="btn ghost" data-add="medicines">+ Medicine</button><button class="btn ghost" data-add="lab">+ Lab test</button><button class="btn" data-newinv="1">+ New invoice</button></div></header>
+  <div class="stats">
+    <div class="stat"><span>Medicine sales today</span><b>${rs(db.invoices.filter(v=>v.date===today).reduce((s,v)=>s+invCalc(v).total,0))}</b></div>
+    <div class="stat"><span>Lab income today</span><b>${rs(labToday)}</b></div>
+    <div class="stat"><span>Tests in progress</span><b>${pending.length}</b></div>
+    <div class="stat"><span>Doctors available</span><b>${avail.length}/${db.doctors.length}</b></div>
+  </div>
+  ${(()=>{const at=db.medicines.filter(m=>medFlag(m));return `<section class="panel"><div class="panel-head"><h2>Medicines needing attention</h2><button class="btn ghost" data-go="medicines">Open stock</button></div>
+    ${at.length?`<ul class="list">${at.map(m=>`<li><div><b>${esc(m.name)}</b><small>Batch ${esc(m.batch||'—')} · Expiry ${fmtDate(m.expiry)}</small></div><div>${daysTo(m.expiry)<0?'<span class="pill p-bad">Expired</span>':daysTo(m.expiry)<=90?'<span class="pill p-warn">Expiring soon</span>':''} ${stockPill(m)}</div></li>`).join('')}</ul>`:`<p class="empty">Stock levels and expiry dates are all fine.</p>`}</section>`})()}
+  <div class="grid2">
+    <section class="panel"><div class="panel-head"><h2>Lab tests in progress</h2><button class="btn ghost" data-go="lab">View all</button></div>
+      ${pending.length?`<ul class="list">${pending.map(x=>`<li><div><b>${esc(x.test)}</b><small>${esc(x.patient)} · ${fmtDate(x.date)}</small></div><div>${pill(x.status)}</div></li>`).join('')}</ul>`:`<p class="empty">No tests waiting. New lab orders will show here.</p>`}
+    </section>
+    <section class="panel"><div class="panel-head"><h2>Customers with balance due</h2><span class="id">Total ${rs(due)}</span></div>
+      ${db.customers.filter(c=>c.balance>0).length?`<ul class="list">${db.customers.filter(c=>c.balance>0).sort((a,b)=>b.balance-a.balance).map(c=>`<li><div><b>${esc(c.name)}</b><small>${esc(c.phone)}</small></div><div class="num">${rs(c.balance)}</div></li>`).join('')}</ul>`:`<p class="empty">All customer accounts are clear.</p>`}
+    </section>
+  </div>
+  <section class="panel"><div class="panel-head"><h2>Doctors on duty</h2><button class="btn ghost" data-go="doctors">Manage doctors</button></div>
+    ${avail.length?`<ul class="list">${avail.map(x=>`<li><div><b>${esc(x.name)}</b><small>${esc(x.specialty)}</small></div><div style="text-align:right">${esc(x.timing||'')}<small>${rs(x.fee)} fee</small></div></li>`).join('')}</ul>`:`<p class="empty">No doctor is marked available.</p>`}
+  </section>
+  ${db.sample?`<div><button class="btn ghost" id="clear">Clear example data and start fresh</button></div>`:''}`;
+}
+
+function renderTable(k){
+  const s=SCHEMA[k];
+  let rows=db[k].filter(r=>(!q||s.search.some(f=>String(r[f]??'').toLowerCase().includes(q.toLowerCase())))&&(!fv||!s.filter||(s.filter.k==='_flag'?medFlag(r)===fv:r[s.filter.k]===fv)));
+  rows=[...rows].reverse();
+  V.innerHTML=`
+  <header class="top"><div><h1>${s.title}</h1><p class="sub">${db[k].length} records ${sampleTag()}</p></div><button class="btn" data-add="${k}">+ Add ${s.one}</button></header>
+  <section class="panel">
+    <div class="panel-head"><h2>All ${s.title.toLowerCase()}</h2>
+      <div class="filters"><button class="btn ghost" data-printlist="${s.title}">Print list</button><input id="q" type="search" placeholder="Search ${s.title.toLowerCase()}…" value="${esc(q)}" aria-label="Search">
+      ${s.filter?`<select id="fv" aria-label="Filter by status"><option value="">${k==='medicines'?'All medicines':'All statuses'}</option>${s.filter.opts.map(o=>`<option ${o===fv?'selected':''}>${o}</option>`).join('')}</select>`:''}</div></div>
+    ${rows.length?`<div class="tbl"><table><thead><tr>${s.cols.map(c=>`<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>
+      ${rows.map(r=>`<tr>${s.cols.map(c=>`<td class="${c[3]?'num':''}">${c[2](r)}</td>`).join('')}<td><div class="acts"><button data-edit="${r.id}">Edit</button><button class="del" data-del="${r.id}">Delete</button></div></td></tr>`).join('')}
+    </tbody></table></div>`:`<p class="empty">${db[k].length?'No records match your search.':`No ${s.title.toLowerCase()} yet. Click “Add ${s.one}” to create the first one.`}</p>`}
+  </section>`;
+  const qi=document.getElementById('q');
+  if(qi){qi.oninput=e=>{q=e.target.value;renderTable(k);const n=document.getElementById('q');n.focus();n.setSelectionRange(q.length,q.length)}}
+  const fs=document.getElementById('fv'); if(fs) fs.onchange=e=>{fv=e.target.value;renderTable(k)};
+}
+
+/* ---------- form dialog ---------- */
+const dlg=document.getElementById('dlg'),frm=document.getElementById('frm');
+let editing=null,editKind=null;
+function openForm(k,id){
+  const s=SCHEMA[k];editKind=k;editing=id?db[k].find(r=>r.id===id):null;
+  document.getElementById('dlg-title').textContent=(editing?'Edit ':'Add ')+s.one;
+  document.getElementById('dlg-err').textContent='';
+  const val=f=>editing?editing[f.k]??'':(f.type==='date'?today:'');
+  document.getElementById('dlg-fields').innerHTML=s.fields.map(f=>{
+    const id='f-'+f.k,v=esc(val(f));let input;
+    if(f.src){const opts=db[f.src].map(x=>x.name);input=`<select id="${id}" name="${f.k}">${f.blank?`<option value="">${f.blank}</option>`:'<option value="">Select…</option>'}${opts.map(o=>`<option ${o===val(f)?'selected':''}>${esc(o)}</option>`).join('')}</select>`}
+    else if(f.opts){input=`<select id="${id}" name="${f.k}">${f.opts.map(o=>`<option ${o===val(f)?'selected':''}>${esc(o)}</option>`).join('')}</select>`}
+    else if(f.area){input=`<textarea id="${id}" name="${f.k}" rows="2">${v}</textarea>`}
+    else input=`<input id="${id}" name="${f.k}" type="${f.type||'text'}" value="${v}" placeholder="${f.ph||''}" ${f.type==='number'?'min="0"':''}>`;
+    return `<label class="${f.full?'full':''}" for="${id}">${f.l}${f.req?' *':''}${input}</label>`}).join('');
+  dlg.showModal();
+  setTimeout(()=>dlg.querySelector('input,select')?.focus(),30);
+}
+frm.onsubmit=e=>{
+  e.preventDefault();
+  const s=SCHEMA[editKind],data={};
+  for(const f of s.fields){let v=frm.elements[f.k].value.trim();if(f.type==='number')v=v===''?'':Number(v);data[f.k]=v}
+  const miss=s.fields.filter(f=>f.req&&data[f.k]==='').map(f=>f.l);
+  if(miss.length){document.getElementById('dlg-err').textContent='Please fill in: '+miss.join(', ');return}
+  if(editing){Object.assign(editing,data);toast('Saved changes')}
+  else{const nums=db[editKind].map(r=>parseInt(r.id.split('-')[1])||0);const base={customers:1000,doctors:200,lab:5000,medicines:300}[editKind];
+    data.id=s.prefix+(Math.max(base,...nums)+1);db[editKind].push(data);toast(cap(s.one)+' added')}
+  save();dlg.close();render();
+};
+document.getElementById('dlg-cancel').onclick=()=>dlg.close();
+
+/* ---------- delete dialog ---------- */
+const del=document.getElementById('del');let delId=null;
+document.getElementById('del-cancel').onclick=()=>del.close();
+document.getElementById('delfrm').onsubmit=e=>{e.preventDefault();db[view]=db[view].filter(r=>r.id!==delId);save();del.close();render();toast('Deleted')};
+
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800)}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.v){view=b.dataset.v;q='';fv='';render();window.scrollTo(0,0)}
+  else if(b.dataset.go){view=b.dataset.go;q='';fv='';render()}
+  else if(b.dataset.newinv)openInvoice();
+  else if(b.dataset.rcpt)showReceipt(b.dataset.rcpt);
+  else if(b.dataset.printlist)printList(b.dataset.printlist);
+  else if(b.dataset.add)openForm(b.dataset.add);
+  else if(b.dataset.edit)openForm(view,b.dataset.edit);
+  else if(b.dataset.del){delId=b.dataset.del;const r=db[view].find(x=>x.id===delId);document.getElementById('del-msg').textContent=`${r.id} · ${r.name||r.customer||r.patient+' – '+r.test} will be removed permanently.${view==='invoices'?' Medicine stock will not be added back.':''}`;del.showModal()}
+  else if(b.id==='clear'){db={customers:[],doctors:[],lab:[],medicines:[],invoices:[]};save();render();toast('Example data cleared')}
+});
+
+const h=location.hash.slice(1);if(['customers','doctors','lab','medicines','invoices'].includes(h))view=h;
+render();
+</script>
+</body>
+</html>
